@@ -384,16 +384,6 @@ jobs:
           # 显示最终产物
           echo "📦 Final artifacts:"
           ls -laR --color artifacts/
-    
-      - name: Generate checksums
-        run: |
-          cd artifacts
-          for file in *; do
-            if [ -f "$file" ]; then
-              sha256sum "$file" > "$file.sha256"
-              echo "Generated checksum for: $file"
-            fi
-          done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
