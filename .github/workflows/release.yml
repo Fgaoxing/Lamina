@@ -1,0 +1,549 @@
+name: Release Lamina Interpreter
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows targets
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            generator: "Visual Studio 17 2022"
+            arch: "x64"
+            toolchain: ""
+          
+         # - os: windows-latest
+         #   target: i686-pc-windows-msvc
+         #   generator: "Visual Studio 17 2022"
+         #   arch: "Win32"
+         #   toolchain: ""
+
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            generator: "Visual Studio 17 2022"
+            arch: "ARM64"
+          
+          # macOS targets
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            generator: "Unix Makefiles"
+            arch: x86_64
+            toolchain: ""
+          
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            generator: "Unix Makefiles"
+            arch: arm64
+            toolchain: ""
+          
+          # Linux targets
+          - os: ubuntu-latest
+            target: "i386-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "i686-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "i686-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "i686-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "x86_64-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "x86_64-linux-gnu"
+            pcknm: "x86-64-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "x32-unknown-linux-gnux32"
+            generator: "Unix Makefiles"
+            arch: "x86_64-linux-gnux32"
+            pcknm: "x86-64-linux-gnux32"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "arm-unknown-linux-gnueabi"
+            generator: "Unix Makefiles"
+            arch: "arm-linux-gnueabi"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "armv7-unknown-linux-gnueabihf"
+            generator: "Unix Makefiles"
+            arch: "arm-linux-gnueabihf"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "aarch64-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "aarch64-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "mips-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "mips-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "mipsel-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "mipsel-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "mips64-unknown-linux-gnuabi64"
+            generator: "Unix Makefiles"
+            arch: "mips64-linux-gnuabi64"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "mips64el-unknown-linux-gnuabi64"
+            generator: "Unix Makefiles"
+            arch: "mips64el-linux-gnuabi64"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "mipsr6-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "mipsisa32r6-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "mipsr6el-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "mipsisa32r6el-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "powerpc-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "powerpc-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "ppc64-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "powerpc64-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "ppc64le-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "powerpc64le-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "alpha-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "alpha-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "arc-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "arc-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "hppa-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "hppa-linux-gnu"
+            toolchain: ""
+
+          #- os: ubuntu-latest
+          #  target: "hppa64-unknown-linux-gnu"
+          #  generator: "Unix Makefiles"
+          #  arch: "hppa64-linux-gnu"
+          #  toolchain: ""
+
+          - os: ubuntu-latest
+            target: "loongarch64-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "loongarch64-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "m68k-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "m68k-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "riscv64-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "riscv64-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "s390x-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "s390x-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "sh4-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "sh4-linux-gnu"
+            toolchain: ""
+
+          - os: ubuntu-latest
+            target: "sparc64-unknown-linux-gnu"
+            generator: "Unix Makefiles"
+            arch: "sparc64-linux-gnu"
+            toolchain: ""
+
+          
+          # Linux musl targets
+          # TODO
+
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "3.31.6"
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            gcc-13-multilib \
+            g++-13-multilib \
+            gcc-13-${{ matrix.pcknm || matrix.arch }} \
+            g++-13-${{ matrix.pcknm || matrix.arch }} \
+            musl-tools
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+          choco install ninja -y
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install cmake ninja pkg-config openssl@3
+          brew link --force openssl@3
+
+      - name: Setup build environment
+        run: |
+          mkdir -p build
+          echo "GENERATOR=${{ matrix.generator }}" >> $GITHUB_ENV
+          echo "ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+          echo "TOOLCHAIN=${{ matrix.toolchain }}" >> $GITHUB_ENV
+          
+      - name: Setup MSVC environment (Windows)
+        uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $cmakeArgs = @(
+            "-B", "build",
+            "-G", "${{ matrix.generator }}",
+            "-A", "${{ matrix.arch }}",
+            "-DCMAKE_BUILD_TYPE=Release"
+          )
+          cmake @cmakeArgs
+
+      - name: Configure CMake (UNIX)
+        if: runner.os == 'macOS' || runner.os == 'Linux'
+        run: |
+          # 平台检测
+          case "$(uname -s)" in
+            Linux*) PLATFORM="Linux";;
+            Darwin*) 
+              PLATFORM="macOS"
+              CMAKE_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=$ARCH";;
+          esac
+
+          # 构建命令
+          if [ -n "$TOOLCHAIN" ]; then
+            echo "Using toolchain: $TOOLCHAIN"
+            cmake -B build \
+              -G "$GENERATOR" \
+              -DCMAKE_TOOLCHAIN_FILE="../$TOOLCHAIN" \
+              -DCMAKE_BUILD_TYPE=Release \
+              $CMAKE_EXTRA_FLAGS \
+              .
+          else
+            echo "Building for $ARCH on $PLATFORM"
+            # 设置编译器（Linux）
+            if [ "$PLATFORM" = "Linux" ] && [ -n "$ARCH" ]; then
+              if [ -z ${{ matrix.musl }} ]; then
+                export CC="$ARCH-gcc-13"
+                export CXX="$ARCH-g++-13"
+              else
+                export CC="gcc-13-$ARCH"
+                export CXX="g++-13-$ARCH"
+              fi
+            fi
+            
+            cmake -B build \
+              -G "$GENERATOR" \
+              -DCMAKE_BUILD_TYPE=Release \
+              $CMAKE_EXTRA_FLAGS \
+              .
+          fi
+
+      - name: Build project
+        run: |
+          cmake --build build --config Release --parallel $(nproc)
+
+      - name: Prepare artifacts (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $buildConfig = "Release"
+          $artifactDir = New-Item -ItemType Directory -Path "artifacts" -Force
+          
+          # 拷贝二进制文件
+          $binSource = "build/bin/$buildConfig"
+          $binDest = "$artifactDir/bin"
+          New-Item -ItemType Directory -Path $binDest -Force | Out-Null
+          if (Test-Path $binSource) {
+              Copy-Item -Path "$binSource/*" -Destination $binDest -Recurse -Force
+              Write-Output "✅ Copied binaries from $binSource to $binDest"
+              Get-ChildItem $binDest | Format-Table Name, Length
+          } else {
+              Write-Error "❌ Binary directory not found: $binSource"
+              exit 1
+          }
+
+          # 拷贝库文件
+          $libSource = "build/lib/lamina/$buildConfig"
+          $libDest = "$artifactDir/lib/lamina"
+          New-Item -ItemType Directory -Path $libDest -Force | Out-Null
+          if (Test-Path $libSource) {
+              Copy-Item -Path "$libSource/*" -Destination $libDest -Recurse -Force
+              Write-Output "✅ Copied libraries from $libSource to $libDest"
+              Get-ChildItem $libDest | Format-Table Name, Length
+          } else {
+              Write-Warning "⚠️ Library directory not found: $libSource"
+          }
+
+          New-Item -ItemType Directory -Path "$libDest/examples" -Force | Out-Null
+          New-Item -ItemType Directory -Path "$libDest/doc" -Force | Out-Null
+          Copy-Item -Path "examples/*" -Destination "$libDest/examples" -Recurse -Force
+          Copy-Item -Path "docs/*" -Destination "$libDest/doc" -Recurse -Force
+
+          # 验证产物结构
+          Write-Output "`n📦 Final artifact structure ($buildConfig):"
+          tree $artifactDir /F
+
+      - name: Prepare artifacts (UNIX)
+        if: runner.os == 'macOS' || runner.os == 'Linux'
+        run: |
+          mkdir -p artifacts/bin
+          mkdir -p artifacts/lib/lamina
+          mkdir -p artifacts/lib/lamina/doc
+          mkdir -p artifacts/lib/lamina/examples
+          
+          EXE_PATH="build/bin/lamina"
+          LIB_PATTERN="build/lib"
+
+          # 复制可执行文件
+          if [ -f "$EXE_PATH" ]; then
+            cp -R "$EXE_PATH" "artifacts/bin"
+            echo "✅ Binary copied: artifacts/bin/"
+          else
+            echo "❌ Binary not found at: $EXE_PATH"
+            exit 1
+          fi
+
+          cp -R "$LIB_PATTERN" artifacts/
+          echo "📦 Library copied:"
+          ls -laR --color artifacts/lib/lamina
+
+          # 拷贝文档和示例
+          cp -R examples/* artifacts/lib/lamina/examples/
+          cp -R docs/* artifacts/lib/lamina/doc/
+
+          # 显示最终产物
+          echo "📦 Final artifacts:"
+          ls -laR --color artifacts/
+    
+      - name: Generate checksums
+        run: |
+          cd artifacts
+          for file in *; do
+            if [ -f "$file" ]; then
+              sha256sum "$file" > "$file.sha256"
+              echo "Generated checksum for: $file"
+            fi
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lamina-${{ matrix.target }}
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 30
+
+  generate-release-notes:
+    name: Generate Release Notes
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.generate-changelog.outputs.changelog }}
+      new-contributors: ${{ steps.find-new-contributors.outputs.new-contributors }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Changelog
+        id: generate-changelog
+        run: |
+          # 获取上一个标签
+          PREV_TAG=$(git describe --tags --abbrev=0 $(git rev-list --tags --skip=1 --max-count=1))
+          
+          # 生成基础变更日志
+          CHANGELOG=$(git log --pretty=format:"- %s (ID: %h)" $PREV_TAG..HEAD)
+          
+          # 输出为 GitHub Actions 变量
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Find New Contributors
+        id: find-new-contributors
+        run: |
+          # 获取所有历史贡献者
+          ALL_CONTRIBUTORS=$(git log --pretty=format:"%an" | sort -u)
+          
+          # 获取上一个标签的贡献者
+          PREV_TAG=$(git describe --tags --abbrev=0 $(git rev-list --tags --skip=1 --max-count=1))
+          PREV_CONTRIBUTORS=$(git log --pretty=format:"%an" $PREV_TAG | sort -u)
+          
+          # 找出新贡献者
+          NEW_CONTRIBUTORS=$(comm -23 <(echo "$ALL_CONTRIBUTORS") <(echo "$PREV_CONTRIBUTORS"))
+          
+          # 输出为 GitHub Actions 变量
+          echo "new-contributors<<EOF" >> $GITHUB_OUTPUT
+          echo "$NEW_CONTRIBUTORS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  release:
+    name: Create Release
+    needs: [build, generate-release-notes]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Display structure of downloaded files
+        run: |
+          echo "Downloaded artifacts:"
+          ls -la --color artifacts/
+
+      - name: Generate checksums
+        run: |
+          cd artifacts
+          for file in *; do
+            if [ -f "$file" ]; then
+              sha256sum "$file" > "$file.sha256"
+              echo "Generated checksum for: $file"
+            fi
+          done
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          body: |
+            ## 修改内容
+            
+            ${{ needs.generate-release-notes.outputs.changelog }}
+            
+            ### 新贡献者
+            
+            ${{ needs.generate-release-notes.outputs.new-contributors }}
+            
+            ## 预编译版本
+            
+            | 系统类型 | 目标三元组 | 工具链 |
+            |---------|-----------|--------|
+            | **Windows** | | |
+            | Windows | x86_64-pc-windows-msvc | msvc |
+            | Windows | aarch64-pc-windows-msvc | msvc |
+            | **macOS** | | |
+            | macOS | x86_64-apple-darwin | darwin |
+            | macOS | aarch64-apple-darwin | darwin |
+            | **Linux** | | |
+            | Linux | i386-unknown-linux-gnu | gnu |
+            | Linux | i686-unknown-linux-gnu | gnu |
+            | Linux | x86_64-unknown-linux-gnu | gnu |
+            | Linux | x32-unknown-linux-gnux32 | gnux32 |
+            | Linux | arm-unknown-linux-gnueabi | gnueabi |
+            | Linux | armv7-unknown-linux-gnueabihf | gnueabihf |
+            | Linux | aarch64-unknown-linux-gnu | gnu |
+            | Linux | mips-unknown-linux-gnu | gnu |
+            | Linux | mipsel-unknown-linux-gnu | gnu |
+            | Linux | mips64-unknown-linux-gnuabi64 | gnuabi64 |
+            | Linux | mips64el-unknown-linux-gnuabi64 | gnuabi64 |
+            | Linux | mipsr6-unknown-linux-gnu | gnu |
+            | Linux | mipsr6el-unknown-linux-gnu | gnu |
+            | Linux | powerpc-unknown-linux-gnu | gnu |
+            | Linux | ppc64-unknown-linux-gnu | gnu |
+            | Linux | ppc64le-unknown-linux-gnu | gnu |
+            | Linux | alpha-unknown-linux-gnu | gnu |
+            | Linux | arc-unknown-linux-gnu | gnu |
+            | Linux | loongarch64-unknown-linux-gnu | gnu |
+            | Linux | m68k-unknown-linux-gnu | gnu |
+            | Linux | riscv64-unknown-linux-gnu | gnu |
+            | Linux | s390x-unknown-linux-gnu | gnu |
+            | Linux | sh4-unknown-linux-gnu | gnu |
+            | Linux | sparc64-unknown-linux-gnu | gnu |
+            
+            共计29个预编译版本
+            
+            请使用sha256校验文件验证下载完整性
+            
+            ## 安装指南
+            
+            > 建议使用包管理器安装
+            
+            1. 下载对应平台的二进制文件
+            2. 在命令行中执行：`chmod +x <文件名>`
+            3. 运行：`./<文件名>`
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          files: |
+            artifacts/*
+          generate_release_notes: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
